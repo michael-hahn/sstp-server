@@ -11,12 +11,12 @@ from . import protocols
 from . import transports
 from .log import logger
 
-# !!!SPLICE +=+=+=+=+=+=+=+=+=+=+=+=+=+
+# !!!SPLICE +=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Imports from Splice package
-from splice import __splice__
-from splice.splice import SpliceMixin
-from splice.identity import empty_taint
-# +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+from .splice import __splice__
+from .splice.splice import SpliceMixin
+from .splice.identity import empty_taint
+# +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 def _create_transport_context(server_side, server_hostname):
     if server_side:
