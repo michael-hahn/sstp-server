@@ -19,4 +19,4 @@ RUN cp chap-secrets /etc/ppp/
 RUN cp pap-secrets /etc/ppp/
 RUN mknod /dev/ppp c 108 0
 
-CMD ["sstpc", "--log-level", "20", "--log-stderr", "--cert-warn", "--user", "user", "--password", "password", "172.17.0.2:443", "usepeerdns", "require-pap", "noipdefault", "nodefaultroute"]
+CMD ["sstpc", "--log-level", "3", "--log-stderr", "--cert-warn", "--user", "user", "--password", "password", "172.17.0.2:443", "usepeerdns", "require-pap", "noipdefault", "nodefaultroute"]
