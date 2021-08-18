@@ -16,7 +16,7 @@ COPY options.sstpd options.sstpd
 COPY chap-secrets chap-secrets
 COPY pap-secrets pap-secrets
 COPY setup.py setup.py
-COPY sstp-server.ini sstp-server.ini
+COPY sstp-server-docker.ini sstp-server-docker.ini
 COPY README.rst README.rst
 COPY asyncio/ asyncio/
 COPY splice/ splice/
@@ -31,5 +31,7 @@ RUN cp pap-secrets /etc/ppp/
 RUN cp asyncio/sslproto.py /usr/lib/python3.8/asyncio/sslproto.py
 RUN cp asyncio/unix_events.py /usr/lib/python3.8/asyncio/unix_events.py
 RUN cp -r splice/ /usr/lib/python3.8/asyncio/
+# Need /dev/ppp module to run ppp
+RUN mknod /dev/ppp c 108 0
 
-CMD ["python3.8", "-O", "build/lib.linux-x86_64-3.8/sstpd/run.py", "-f", "sstp-server.ini", "-s", "site1"]
+CMD ["python3.8", "-O", "build/lib.linux-x86_64-3.8/sstpd/run.py", "-f", "sstp-server-docker.ini", "-s", "site1"]
