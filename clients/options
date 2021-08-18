@@ -1,0 +1,6 @@
+name user
+require-pap
+nologfd
+ms-dns 8.8.8.8
+ms-dns 8.8.4.4
+debug
