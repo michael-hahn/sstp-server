@@ -13,6 +13,8 @@ RUN apt-get install ppp-dev ppp -y
 COPY cert.pem cert.pem
 COPY key.pem key.pem
 COPY options.sstpd options.sstpd
+COPY chap-secrets chap-secrets
+COPY pap-secrets pap-secrets
 COPY setup.py setup.py
 COPY sstp-server.ini sstp-server.ini
 COPY README.rst README.rst
@@ -24,6 +26,8 @@ COPY sstpd/ sstpd/
 RUN python3.8 setup.py install
 
 RUN cp options.sstpd /etc/ppp/
+RUN cp chap-secrets /etc/ppp/
+RUN cp pap-secrets /etc/ppp/
 RUN cp asyncio/sslproto.py /usr/lib/python3.8/asyncio/sslproto.py
 RUN cp asyncio/unix_events.py /usr/lib/python3.8/asyncio/unix_events.py
 RUN cp -r splice/ /usr/lib/python3.8/asyncio/
