@@ -1,0 +1,8 @@
+name sstpd
+require-pap
+remotename user
+nologfd
+nodefaultroute
+ms-dns 8.8.8.8
+ms-dns 8.8.4.4
+debug
