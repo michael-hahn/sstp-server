@@ -7,6 +7,11 @@ from .constants import VERBOSE
 from .codec import escape, PppDecoder
 from .utils import hexdump
 
+# !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+# Splice package is added to Python3.6/asyncio/. We will
+# use asyncio.splice module when __splice__ is set to True
+from asyncio.splice import __splice__
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 
 STDIN = 0
 STDOUT = 1
@@ -37,6 +42,17 @@ class PPPDProtocol(asyncio.SubprocessProtocol):
         self.read_transport = transport.get_pipe_transport(STDOUT)
 
     def pipe_data_received(self, fd, data):
+        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+        # Like in sstp.py, if __splice__ is set, data received from the pipe is tainted
+        # and should not be trusted. DP is typically needed before granting trust.
+        # TODO: data received will be untrusted. Defensive programming must
+        #  be applied here and set the data to be trusted afterwards.
+        if __splice__:
+            assert not data.trusted
+            # FIXME: DP code here if needed
+            # After DP, data should be trusted.
+            data.trusted = True
+        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
         if fd == STDOUT:
             self.out_received(data)
         else:

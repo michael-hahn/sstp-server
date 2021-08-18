@@ -17,83 +17,68 @@ from . import certtool
 from .sstp import SSTPProtocolFactory
 from .address import IPPool
 
+# !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Splice package is added to Python3.6/asyncio/. We will
+# use asyncio.splice module when __splice__ is set to True
+from asyncio.splice import __splice__
+if __splice__:
+    from asyncio.splice.splicetypes import SpliceSocket as socket
+else:
+    from socket import socket
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
 
 def _get_args():
-    conf_parser = argparse.ArgumentParser(
-            add_help=False)
-    conf_parser.add_argument("-f", "--conf-file",
-            help="Specify config file.", metavar="FILE")
-    conf_parser.add_argument("-s", "--conf-section",
-            help="Specify section name on config file.",
-            metavar="SITE", default="DEFAULT")
+    conf_parser = argparse.ArgumentParser(add_help=False)
+    conf_parser.add_argument("-f", "--conf-file", help="Specify config file.", metavar="FILE")
+    conf_parser.add_argument("-s", "--conf-section", help="Specify section name on config file.",
+                             metavar="SITE", default="DEFAULT")
 
     args, remaining_argv = conf_parser.parse_known_args()
-    defaults = {
-            'listen': '',
-            'listen_port': 443,
-            'pppd': '/usr/sbin/pppd',
-            'pppd_config': '/etc/ppp/options.sstpd',
-            'local': '192.168.20.1',
-            'log_level': logging.INFO
-    }
+    defaults = {'listen': '',
+                'listen_port': 443,
+                'pppd': '/usr/sbin/pppd',
+                'pppd_config': '/etc/ppp/options.sstpd',
+                'local': '192.168.20.1',
+                'log_level': logging.INFO}
     if args.conf_file:
         config = SafeConfigParser()
         config.read(args.conf_file)
         try:
             defaults.update(dict(config.items(args.conf_section)))
-        except NoSectionError as e:
-            print('Error: section [%s] not found in config file.' % \
-                  args.conf_section, file=sys.stderr)
+        except NoSectionError:
+            print('Error: section [%s] not found in config file.' % args.conf_section, file=sys.stderr)
             sys.exit(1)
-            return
 
-    parser = argparse.ArgumentParser(parents=[conf_parser],
-            description=__doc__)
+    parser = argparse.ArgumentParser(parents=[conf_parser], description=__doc__)
     parser.set_defaults(**defaults)
-    parser.add_argument('-l', '--listen',
-            metavar='ADDRESS',
-            help='The address to bind to, default to all. Either '
-                 'comma-separated list of IP addresses '
-                 'or a path start with "/" for a UNIX domain socket.')
-    parser.add_argument('-p', '--listen-port',
-            type=int, metavar='PORT')
-    parser.add_argument('-c', '--pem-cert',
-            metavar='PEM-CERT',
-            help='Path of PEM-format certificate.')
-    parser.add_argument('-k', '--pem-key',
-            metavar='PEM-KEY',
-            help='Path of private key file if separated from the '
-                 'certificate file.')
-    parser.add_argument('-n', '--no-ssl',
-            action='store_true',
-            help='Use plain HTTP instead of HTTPS. '
-                 'Useful when running behind a reverse proxy.'
-                 'Enables X-Forwarded-For HTTP header processing.')
-    parser.add_argument('--proxy-protocol',
-            action='store_true',
-            help='Enable PROXY PROTOCOL, imply --no-ssl')
-    parser.add_argument('--pppd',
-            metavar='PPPD-FILE')
-    parser.add_argument('--pppd-config',
-            metavar='CONFIG-FILE',
-            help='Default to /etc/ppp/options.sstpd')
-    parser.add_argument('--local',
-            metavar='ADDRESS',
-            help="Address of server side on ppp, default to 192.168.20.1")
-    parser.add_argument('--remote',
-            metavar='NETWORK',
-            help="Enable internal IP management. Client's IP will be selected "
-                 "from NETWORK (e.g. 192.168.20.0/24).")
-    parser.add_argument('--range',
-            metavar='RANGE',
-            help="Limit remote NETWORK to given RANGE (e.g. 192.168.20.10-20 "
-            "or 192.168.20.10-192.168.20.20)")
-    parser.add_argument('--ciphers',
-            metavar="CIPHER-LIST",
-            help='Custom OpenSSL cipher suite. See ciphers(1).')
-    parser.add_argument('-v', '--log-level',
-            type=int, metavar='LOG-LEVEL',
-            help="1 to 50. Default 20, debug 10, verbose 5.")
+    parser.add_argument('-l', '--listen', metavar='ADDRESS',
+                        help='The address to bind to, default to all. Either '
+                             'comma-separated list of IP addresses '
+                             'or a path start with "/" for a UNIX domain socket.\n'
+                             '[SPLICE] ALWAYS PROVIDE ONLY A SINGLE IP ADDRESS.')
+    parser.add_argument('-p', '--listen-port', type=int, metavar='PORT')
+    parser.add_argument('-c', '--pem-cert', metavar='PEM-CERT', help='Path of PEM-format certificate.')
+    parser.add_argument('-k', '--pem-key', metavar='PEM-KEY',
+                        help='Path of private key file if separated from the certificate file.')
+    parser.add_argument('-n', '--no-ssl', action='store_true',
+                        help='Use plain HTTP instead of HTTPS. '
+                             'Useful when running behind a reverse proxy.'
+                             'Enables X-Forwarded-For HTTP header processing.\n'
+                             '[SPLICE] ALWAYS USE SSL.')
+    parser.add_argument('--proxy-protocol', action='store_true', help='Enable PROXY PROTOCOL, imply --no-ssl')
+    parser.add_argument('--pppd', metavar='PPPD-FILE')
+    parser.add_argument('--pppd-config', metavar='CONFIG-FILE', help='Default to /etc/ppp/options.sstpd')
+    parser.add_argument('--local', metavar='ADDRESS', help="Address of server side on ppp, default to 192.168.20.1")
+    parser.add_argument('--remote', metavar='NETWORK',
+                        help="Enable internal IP management. Client's IP will be selected "
+                             "from NETWORK (e.g. 192.168.20.0/24).")
+    parser.add_argument('--range', metavar='RANGE',
+                        help="Limit remote NETWORK to given RANGE (e.g. 192.168.20.10-20 "
+                             "or 192.168.20.10-192.168.20.20)")
+    parser.add_argument('--ciphers', metavar="CIPHER-LIST", help='Custom OpenSSL cipher suite. See ciphers(1).')
+    parser.add_argument('-v', '--log-level', type=int, metavar='LOG-LEVEL',
+                        help="1 to 50. Default 20, debug 10, verbose 5.")
 
     args = parser.parse_args()
     args.log_level = int(args.log_level)
@@ -120,7 +105,11 @@ def _load_cert(cert_path, key_path=None):
 def main():
     args = _get_args()
     logging.basicConfig(level=args.log_level,
-            format='%(asctime)s %(levelname)-s: %(message)s')
+                        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+                        # Use filename option to log to a file instead of console
+                        # filename='sstp.log',
+                        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+                        format='%(asctime)s %(levelname)-s: %(message)s')
     logging.addLevelName(5, 'VERBOSE')
 
     if args.remote:
@@ -161,13 +150,31 @@ def main():
                                        args.listen,
                                        ssl=ssl_ctx)
     else:
-        coro = loop.create_server(factory,
-                                  args.listen.split(','),
-                                  args.listen_port,
-                                  ssl=ssl_ctx)
+        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+        # Note that depending on the import, socket can be
+        # either a regular socket or SpliceSocket!
+        sock = socket(proto=6)
+        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+        sock.bind((args.listen, args.listen_port))
+        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        # Supply socket directly instead of providing addr
+        # and port to create_server() (This is a modification)
+        # from the original SSTP implementation here.
+        # coro = loop.create_server(factory,
+        #                           args.listen.split(','),
+        #                           args.listen_port,
+        #                           ssl=ssl_ctx)
+        coro = loop.create_server(factory, sock=sock, ssl=ssl_ctx)
+        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
     server = loop.run_until_complete(coro)
 
     if not on_unix_socket:
+        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+        # We should expect only one sock in server.sockets
+        # since we provide the socket to create_server().
+        # In the original implementation, one can provide
+        # a list of addresses and ports to listen from.
+        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
         for sock in server.sockets:
             sock.setsockopt(IPPROTO_TCP, TCP_NODELAY, 1)
 

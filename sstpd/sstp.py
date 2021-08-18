@@ -18,6 +18,16 @@ from .utils import hexdump
 from .ppp import PPPDProtocol, PPPDProtocolFactory, is_ppp_control_frame, PPPDSSTPPluginFactory
 from .proxy_protocol import parse_pp_header, PPException, PPNoEnoughData
 
+# !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Splice package is added to Python3.6/asyncio/. We will
+# use asyncio.splice module when __splice__ is set to True
+from asyncio.splice import __splice__
+if __splice__:
+    from asyncio.splice.splice import SpliceAttrMixin
+    from asyncio.splice.identity import taint_id_from_addr
+# Other imports used specific for SPLICE
+import gc
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 HTTP_REQUEST_BUFFER_SIZE = 10 * 1024
 HELLO_TIMEOUT = 60
@@ -42,7 +52,6 @@ class State(Enum):
 
 
 class SSTPProtocol(Protocol):
-
     def __init__(self, logging):
         self.logging = logging
         self.loop = asyncio.get_event_loop()
@@ -72,7 +81,6 @@ class SSTPProtocol(Protocol):
             'port': self.remote_port,
         })
 
-
     def connection_made(self, transport):
         self.transport = transport
         self.proxy_protocol_passed = not self.factory.proxy_protocol
@@ -83,9 +91,36 @@ class SSTPProtocol(Protocol):
         elif type(peer) == tuple:
             self.remote_host = peer[0]
             self.remote_port = peer[1]
-
+        self.logging.info("[splice] SSTP connection initiated with "
+                          "remote host {}:{}.".format(self.remote_host, self.remote_port))
 
     def data_received(self, data):
+        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+        # Check if it is a SPLICE command, but only if __splice__ is set
+        # TODO: data received will be untrusted. Defensive programming must
+        #  be applied here and set the data to be trusted afterwards.
+        if __splice__:
+            assert not data.trusted
+            # FIXME: DP code here if needed
+            # After DP, data should be trusted.
+            data.trusted = True
+            if data.startswith(b'SPLICE'):
+                # SPLICE command is simple: SPLICE:<TAINT ID>
+                # Get the taint of the user (int) to be spliced
+                sid = int(data.decode("utf-8").strip().split(':')[1])
+                # Splice deletion code
+                objs = gc.get_objects()
+                for obj in objs:
+                    # Identify all splice-able objects
+                    if hasattr(obj, 'taints') and obj.taints == sid:
+                        print("[splice] splicing object: {} "
+                              "(type: {}, taints: {})".format(obj, type(obj), obj.taints))
+                        # with obj.splice() as resource:
+                        #     pass
+                # Respond to the client when Splice deletion is finished
+                self.transport.write(b'Splice: user %s is erased\r\n' % str(sid).encode())
+                return
+        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
         if self.state == State.SERVER_CALL_DISCONNECTED:
             if self.proxy_protocol_passed:
                 self.http_data_received(data)
@@ -93,7 +128,6 @@ class SSTPProtocol(Protocol):
                 self.proxy_protocol_data_received(data)
         else:
             self.sstp_data_received(data)
-
 
     def connection_lost(self, reason):
         self.logging.info('Connection finished.')
@@ -358,7 +392,19 @@ class SSTPProtocol(Protocol):
             ppp_env['SSTP_REMOTE_PORT'] = str(self.remote_port)
 
         factory = PPPDProtocolFactory(callback=self, remote=remote)
-        coro = self.loop.subprocess_exec(factory, self.factory.pppd, *args, env=ppp_env)
+        # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        # Pass taints information to subprocess_exec() if __splice__ is set.
+        if __splice__:
+            coro = self.loop.subprocess_exec(factory, self.factory.pppd, *args, env=ppp_env,
+                                             # The following are the Splice-specific arguments, passed in as
+                                             # kwargs. Note that the child process itself can be trusted but
+                                             # data received from the child process may not be and need DP.
+                                             taints=taint_id_from_addr((self.remote_host, self.remote_port)),
+                                             trusted=True,
+                                             synthesized=False)
+        else:
+            coro = self.loop.subprocess_exec(factory, self.factory.pppd, *args, env=ppp_env)
+        # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
         task = asyncio.ensure_future(coro)
         task.add_done_callback(self.pppd_started)
         self.state = State.SERVER_CALL_CONNECTED_PENDING
@@ -428,7 +474,9 @@ class SSTPProtocol(Protocol):
         if not self.should_verify_crypto_binding():
             self.logging.debug("No crypto binding needed.")
             self.state = State.SERVER_CALL_CONNECTED
-            self.logging.info('Connection established.')
+            # self.logging.info('Connection established.')
+            self.logging.info('[splice] SSTP connection fully established (including PPP tunneling) '
+                              'with remote host {}:{}.'.format(self.remote_host, self.remote_port))
             return
 
         if self.hlak is None:
