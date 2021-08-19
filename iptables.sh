@@ -12,6 +12,9 @@ iptables -A OUTPUT -o ppp+ -j ACCEPT
 # Enable IP forwarding
 iptables -F FORWARD
 iptables -A FORWARD -j ACCEPT
-# Enable NAT for eth0 on ppp* interfaces
+iptables -I FORWARD -s 192.168.20.0/24 -d 172.18.0.0/24 -j ACCEPT
+iptables -I FORWARD -d 192.168.20.0/24 -s 172.18.0.0/24 -j ACCEPT
+# Enable NAT for eth* on ppp* interfaces
 iptables -A POSTROUTING -t nat -o eth0 -j MASQUERADE
+iptables -A POSTROUTING -t nat -o eth1 -j MASQUERADE
 iptables -A POSTROUTING -t nat -o ppp+ -j MASQUERADE
