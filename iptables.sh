@@ -1,6 +1,6 @@
 #!/bin/sh
 
- Ref: https://wiki.archlinux.org/title/PPTP_server
+# Ref: https://wiki.archlinux.org/title/PPTP_server
 # Ref: https://ppp.samba.org/pppd.html
 # Create a sysctl configuration file /etc/sysctl.d/30-ipforward.conf and enable kernel packet forwarding
 echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/30-ipforward.conf
