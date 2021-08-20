@@ -80,14 +80,11 @@ docker exec -it sstp-server bash
 # Ref: https://hub.docker.com/r/networkstatic/iperf3/
 docker run -it --rm --name=iperf3-server --network=server networkstatic/iperf3 -s
 
-# Ideally run the following in a separate console (e.g., using tmux)
-# Run an Apache HTTPd server on the server network
-# Ref: https://hub.docker.com/r/jordi/ab
-docker run -d --name=httpd --network server jordi/server:http
-
 # BUILD SSTP CLIENT IN CLIENTS FOLDER NOW!!!
 
 # MORE USEFUL LINKS ====================================================================================================
+# Docker general tutorial
+# https://docker-curriculum.com
 # Docker networking tutorial
 # https://docs.docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-networks
 # Useful tcpdump commands:
