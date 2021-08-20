@@ -12,7 +12,8 @@ const puppeteer = require("puppeteer");
     });
 
     const page = await browser.newPage();
-    await page.goto("https://172.18.0.5");  // 172.18.0.5 is the flask application's IP
+    // Note: SSL not set up so do not use https!
+    await page.goto("http://172.18.0.5");  // 172.18.0.5 is the flask application's IP
     // await page.screenshot({path: "screenshot.png"});
 
     await page.close();
