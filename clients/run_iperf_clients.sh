@@ -16,7 +16,7 @@ do
   # Should pin to the same set of CPU as SSTP clients
   # Mount FS so that we can get log data from the host machine
   # Ref: https://docs.docker.com/storage/bind-mounts/
-	docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${counter} --mount type=bind,source="$(pwd)",target=/var networkstatic/iperf3 -c ${IP} --logfile /var/${IP}.log
-	((counter++))
-	((ip_suffix++))
+  docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${counter} --mount type=bind,source="$(pwd)",target=/var networkstatic/iperf3 -c ${IP} --logfile /var/${IP}.log
+  ((counter++))
+  ((ip_suffix++))
 done

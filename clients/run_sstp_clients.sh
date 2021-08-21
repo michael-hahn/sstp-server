@@ -10,6 +10,6 @@ while [ $counter -le $NUM_CLIENTS ]
 do
   IP=${IP_BASE}${ip_suffix}
   docker run -d --rm --cpuset-cpus="2" --privileged --network client --ip=${IP} --name=sstp-client-${counter} sstp-client
-	((counter++))
-	((ip_suffix++))
+  ((counter++))
+  ((ip_suffix++))
 done

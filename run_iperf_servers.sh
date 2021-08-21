@@ -13,7 +13,7 @@ while [ $counter -le $NUM_SERVERS ]
 do
   IP=${IP_BASE}${ip_suffix}
   # Should pin to a different set of CPU as iperf clients
-	docker run -d --rm --cpuset-cpus="3" --name=iperf-server-${counter} --network=server --ip=${IP} networkstatic/iperf3 -s
-	((counter++))
-	((ip_suffix++))
+  docker run -d --rm --cpuset-cpus="3" --name=iperf-server-${counter} --network=server --ip=${IP} networkstatic/iperf3 -s
+  ((counter++))
+  ((ip_suffix++))
 done
