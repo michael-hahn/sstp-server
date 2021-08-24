@@ -9,9 +9,9 @@
 # This script does *not* contain code to clean up after the experiment is finished.
 
 # This script takes the following flag(s):
-# -s: if set, the SSTP server is running with SPLICE (default is false)
+# -s true/false: if set to true, the SSTP server is running with SPLICE (default is false)
 # -n NUM_CLIENTS: number of iperf3 clients (which is the same number of SSTP clients and iperf3 servers)
-# -u: if set, use UDP instead of TCP
+# -u true/false: if set to true, use UDP instead of TCP
 
 # Parse the flag(s)
 WITH_SPLICE='false'
@@ -19,9 +19,9 @@ UDP='false'
 while getopts s:n:u: flag
 do
   case "${flag}" in
-    s) WITH_SPLICE='true';;
+    s) WITH_SPLICE=${OPTARG};;
+    u) UDP=${OPTARG};;
     n) NUM_CLIENTS=${OPTARG};;
-    u) UDP='true';;
     *) echo "UNKNOWN OPTION --> ${OPTKEY}" >&2
        exit 1;;
   esac

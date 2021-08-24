@@ -8,7 +8,7 @@
 # You should always run this script first before running experiments.
 
 # This script takes the following flag(s):
-# -s: if set, the SSTP server is running with SPLICE (default is false)
+# -s true/false: if set, the SSTP server is running with SPLICE (default is false)
 # -n NUM_CLIENTS: number of SSTP clients
 
 # Parse the flag(s)
@@ -16,7 +16,7 @@ WITH_SPLICE='false'
 while getopts s:n: flag
 do
   case "${flag}" in
-    s) WITH_SPLICE='true';;
+    s) WITH_SPLICE=${OPTARG};;
     n) NUM_CLIENTS=${OPTARG};;
     *) echo "UNKNOWN OPTION --> ${OPTKEY}" >&2
        exit 1;;
