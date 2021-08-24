@@ -12,15 +12,24 @@
 # -n NUM_CLIENTS: number of SSTP clients (which is the same number of iperf3 clients and iperf3 servers)
 # Parse the flags
 WITH_SPLICE='false'
-while getopts s:n: flag
+UDP='false'
+while getopts s:n:u: flag
 do
   case "${flag}" in
     s) WITH_SPLICE='true';;
     n) NUM_CLIENTS=${OPTARG};;
+    u) UDP='true';;
     *) echo "UNKNOWN OPTION --> ${OPTKEY}" >&2
        exit 1;;
   esac
 done
+
+if ${UDP}; then
+  echo "[INFO] running UDP experiments with ${NUM_CLIENTS} client connections."
+else
+  echo "[INFO] running TCP experiments with ${NUM_CLIENTS} client connections."
+fi
+echo "[INFO] SPLICE is enabled: ${WITH_SPLICE}."
 
 # Create the 'client' and the 'server' network. You do not need the --driver bridge flag since it’s the default,
 # but this example shows how to specify it.
@@ -63,7 +72,7 @@ do
   echo "[STATUS] setting up SSTP client: sstp-client-${COUNTER}..."
   docker run -d --rm --cpuset-cpus="2" --privileged --network client --ip=${SSTP_CLIENT_IP} --name=sstp-client-${COUNTER} sstp-client
   echo "[STATUS] setting up iPerf3 server: iperf-server-${COUNTER}..."
-  docker run -d --rm --cpuset-cpus="3" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} networkstatic/iperf3 -s
+  docker run -d --rm --cpuset-cpus="3" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} networkstatic/iperf3 -s -J
   ((COUNTER++))
   ((IP_SUFFIX++))
 done
@@ -78,15 +87,30 @@ COUNTER=1
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   IPERF_SERVER_IP=${IPERF_SERVER_IP_BASE}${IP_SUFFIX}
-  LOG_NAME=${IPERF_SERVER_IP}-"${NUM_CLIENTS}".log
+  LOG_NAME=${IPERF_SERVER_IP}-"${NUM_CLIENTS}"
   if ${WITH_SPLICE}; then
-    LOG_NAME=${IPERF_SERVER_IP}-"${NUM_CLIENTS}"-splice.log
+    LOG_NAME=${IPERF_SERVER_IP}-"${NUM_CLIENTS}"-splice
   fi
-  # Should pin to the same set of CPU as SSTP clients
-  # Mount FS so that we can get log data from the host machine
+  # Should pin to the same set of CPU as SSTP clients use --cpuset-cpus
+  # Mount FS using --mount so that we can get log data from the host machine
   # Ref: https://docs.docker.com/storage/bind-mounts/
-  docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
-  networkstatic/iperf3 -c ${IPERF_SERVER_IP} --logfile /var/"${LOG_NAME}"
+  # iPerf3 parameters: (ref: https://www.mankier.com/1/iperf3#)
+  # -c: Run iPerf in client mode, connecting to an iPerf server running on ${IPERF_SERVER_IP}
+  # -u: Use UDP rather than TCP
+  # -b: Set target bitrate to n bits/sec (default 1 Mbit/sec for UDP, unlimited for TCP/SCTP).
+  #     Setting the target bitrate to 0 will disable bitrate limits (particularly useful for UDP tests).
+  # -t: The time in seconds to transmit data for
+  # -O: Omit the first n seconds of the test, to skip past the TCP slowstart period
+  # -V: Verbose to give more detailed output
+  # --get-server-output: Retrieve the server-side output
+  # -J: Output in JSON format for easy parsing of results
+  if ${UDP}; then
+    docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -u -b 0 -t 60 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-udp.json
+  else
+    docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -t 62 -O 2 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-tcp.json
+  fi
   ((COUNTER++))
   ((IP_SUFFIX++))
 done
