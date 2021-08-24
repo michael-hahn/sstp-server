@@ -34,8 +34,10 @@ while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   echo "[STATUS] stopping iPerf3 server: iperf-server-${COUNTER}..."
   docker container stop iperf-server-${COUNTER}
-  echo "[STATUS] stopping SSTP client: sstp-client-${COUNTER}..."
-  docker container stop sstp-client-${COUNTER}
+# Note that once SSTP server is destroyed, SSTP clients are automatically destroyed as well.
+# No need to run the following commented commands.
+#  echo "[STATUS] stopping SSTP client: sstp-client-${COUNTER}..."
+#  docker container stop sstp-client-${COUNTER}
   ((COUNTER++))
 done
 echo "[STATUS] clean up is finished."

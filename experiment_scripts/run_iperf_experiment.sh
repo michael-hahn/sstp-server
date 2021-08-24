@@ -91,3 +91,4 @@ do
   ((IP_SUFFIX++))
 done
 echo "[STATUS] all iPerf3 clients are running, they will be destroyed after they are finished."
+echo "[HINT] run clean_up_iperf_experiment.sh to clean up the rest after the experiment is finished."
