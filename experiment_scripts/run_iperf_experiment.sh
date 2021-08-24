@@ -12,11 +12,11 @@
 # -n NUM_CLIENTS: number of SSTP clients (which is the same number of iperf3 clients and iperf3 servers)
 # Parse the flags
 WITH_SPLICE='false'
-while getopts s:u: flag
+while getopts s:n: flag
 do
   case "${flag}" in
     s) WITH_SPLICE='true';;
-    u) NUM_CLIENTS=${OPTARG};;
+    n) NUM_CLIENTS=${OPTARG};;
     *) echo "UNKNOWN OPTION --> ${OPTKEY}" >&2
        exit 1;;
   esac
