@@ -13,7 +13,7 @@
 # -f js file: the name of the Node.js puppeteer file (the file must be in the puppeteer folder)
 
 # Parse the flag(s)
-while getopts n:f flag
+while getopts n:f: flag
 do
   case "${flag}" in
     n) NUM_CLIENTS=${OPTARG};;
@@ -36,7 +36,8 @@ cd ../puppeteer
 COUNTER=1
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
-  docker run -d --init --rm --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} --net=container:sstp-client-${COUNTER} \
+  docker run -d --init --rm --cpuset-cpus="2" --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
+  --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)"/data,target=/home/pptruser/Downloads \
   puppeteer node -e "$(cat "${PUPPETEER_FILE}")"
   ((COUNTER++))
 done
