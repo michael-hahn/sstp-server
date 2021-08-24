@@ -20,16 +20,22 @@ done
 
 # Stop the SSTP server
 if ${WITH_SPLICE}; then
+  echo "[STATUS] stopping SSTP server: sstp-server-splice..."
   docker container stop sstp-server-splice
 else
+  echo "[STATUS] stopping SSTP server: sstp-server..."
   docker container stop sstp-server
 fi
+echo "[STATUS] SSTP server is destroyed."
 
 # Stop the SSTP clients and iperf servers
 COUNTER=1
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
+  echo "[STATUS] stopping iPerf3 server: iperf-server-${COUNTER}..."
   docker container stop iperf-server-${COUNTER}
+  echo "[STATUS] stopping SSTP client: sstp-client-${COUNTER}..."
   docker container stop sstp-client-${COUNTER}
   ((COUNTER++))
 done
+echo "[STATUS] clean up is finished."

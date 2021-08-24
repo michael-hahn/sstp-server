@@ -24,16 +24,28 @@ done
 
 # Create the 'client' and the 'server' network. You do not need the --driver bridge flag since it’s the default,
 # but this example shows how to specify it.
-docker network create --driver bridge client --subnet 172.19.0.0/20
-docker network create --driver bridge server --subnet 172.18.0.0/20
+echo "[STATUS] setting up docker bridge networks only if they do not exist already..."
+if [ -z $(docker network ls --filter name=^client$ --format="{{ .Name }}") ] ; then
+  echo "[STATUS] 'client' network does not exist, setting it up now..."
+  docker network create --driver bridge client --subnet 172.19.0.0/20
+fi
+if [ -z $(docker network ls --filter name=^server$ --format="{{ .Name }}") ] ; then
+  echo "[STATUS] 'server' network does not exist, setting it up now..."
+  docker network create --driver bridge server --subnet 172.18.0.0/20
+fi
+echo "[STATUS] docker networks are ready."
+
 # Run the sstp-server container and connect the server to both the client and the server network.
 if ${WITH_SPLICE}; then
-  docker run -d --rm --cpuset-cpus="0,1" --network client --ip="172.19.0.2" --name=sstp-server --privileged sstp-server-splice
+  echo "[STATUS] setting up SSTP server: sstp-server-splice..."
+  docker run -d --rm --cpuset-cpus="0,1" --network client --ip="172.19.0.2" --name=sstp-server-splice --privileged sstp-server-splice
   docker network connect --ip="172.18.0.2" server sstp-server-splice
 else
+  echo "[STATUS] setting up SSTP server: sstp-server..."
   docker run -d --rm --cpuset-cpus="0,1" --network client --ip="172.19.0.2" --name=sstp-server --privileged sstp-server
   docker network connect --ip="172.18.0.2" server sstp-server
 fi
+echo "[STATUS] SSTP server is ready."
 
 # Wait a little bit until the SSTP server is setup
 sleep 5
@@ -48,11 +60,14 @@ while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   SSTP_CLIENT_IP=${SSTP_CLIENT_IP_BASE}${IP_SUFFIX}
   IPERF_SERVER_IP=${IPERF_SERVER_IP_BASE}${IP_SUFFIX}
+  echo "[STATUS] setting up SSTP client: sstp-client-${COUNTER}..."
   docker run -d --rm --cpuset-cpus="2" --privileged --network client --ip=${SSTP_CLIENT_IP} --name=sstp-client-${COUNTER} sstp-client
+  echo "[STATUS] setting up iPerf3 server: iperf-server-${COUNTER}..."
   docker run -d --rm --cpuset-cpus="3" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} networkstatic/iperf3 -s
   ((COUNTER++))
   ((IP_SUFFIX++))
 done
+echo "[STATUS] SSTP clients and iPerf3 servers are ready."
 
 # Wait a little bit until SSTP clients are connected to the SSTP server
 sleep 10
@@ -75,3 +90,4 @@ do
   ((COUNTER++))
   ((IP_SUFFIX++))
 done
+echo "[STATUS] all iPerf3 clients are running, they will be destroyed after they are finished."
