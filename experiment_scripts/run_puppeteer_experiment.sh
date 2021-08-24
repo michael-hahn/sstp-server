@@ -25,7 +25,7 @@ done
 
 # Run the web server container
 echo "[STATUS] setting up the web server: web-server..."
-docker run -d --name=web-server --network=server --ip="172.18.0.5" flask
+docker run -d --rm --name=web-server --network=server --ip="172.18.0.5" flask
 echo "[STATUS] the web server is ready."
 
 # Wait a little bit until the web server is set up
