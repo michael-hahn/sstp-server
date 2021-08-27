@@ -169,15 +169,15 @@ def replace(new, paths):
 # calling this function in a loop), which incurs lots of overhead. We therefore use
 # get_path_map() and replace() instead to minimize heap walks.
 # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-# def replace(old, new):
-#     for path in sorted(hp.iso(old).pathsin, key=_path_key_func):
-#         relation = path.path[1]
-#         try:
-#             func = _RELATIONS[type(relation).__bases__[0]]
-#         except KeyError:
-#             print("Unknown relation: {} ({})".format(relation, type(path.src.theone)))
-#             continue
-#         func(path.src.theone, relation.r, new)
+def replace_single(old, new):
+    for path in sorted(hp.iso(old).pathsin, key=_path_key_func):
+        relation = path.path[1]
+        try:
+            func = _RELATIONS[type(relation).__bases__[0]]
+        except KeyError:
+            print("Unknown relation: {} ({})".format(relation, type(path.src.theone)))
+            continue
+        func(path.src.theone, relation.r, new)
 
 
 if __name__ == "__main__":

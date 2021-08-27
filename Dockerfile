@@ -9,6 +9,7 @@ RUN apt-get install python3.8 python3.8-dev python3.8-distutils python3.8-venv p
 RUN apt-get install python3-pip -y
 RUN apt-get install ppp-dev ppp -y
 RUN apt-get install iptables -y
+RUN apt-get install python3-gdbm -y
 
 # copy the dependencies file to the working directory
 COPY cert.pem cert.pem

@@ -21,6 +21,7 @@ from .proxy_protocol import parse_pp_header, PPException, PPNoEnoughData
 
 # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 import replace
+import gc
 from .constraints import merge_constraints
 from .synthesis import init_synthesizer_on_type
 # Splice package is added to Python3.6/asyncio/. We will
@@ -187,11 +188,9 @@ class SSTPProtocol(Protocol):
                 # Get the taint of the user (int) to be spliced
                 sid = int(data.decode("utf-8").strip().split(':')[1])
                 # Splice deletion code
-                # to_replace holds a list of *old* non-system objects to be synthesized
-                to_replace = []
                 system_obj_synthesized, obj_synthesized, obj_flagged = 0, 0, 0
                 start_timer = time.perf_counter()
-                objs = replace.get_objects()    # use guppy
+                objs = gc.get_objects()
                 print("Getting all {} heap objects takes: {}s"
                       .format(len(objs), time.perf_counter() - start_timer))
                 start_timer = time.perf_counter()
@@ -207,33 +206,19 @@ class SSTPProtocol(Protocol):
                                 # programming afterwards if necessary.
                                 system_obj_synthesized += 1
                         except:
-                            # Gather all non-system-resource objects for data synthesis
-                            to_replace.append(obj)
-                # Get referrers of all objs that must be replaced. "paths" is a dictionary that maps
-                # an object ID (for objects in to_replace) to all the paths of the object's referrers.
-                paths = replace.get_path_map(to_replace)
-                for obj in to_replace:
-                    merged_constraints = concretize_and_merge_constraints(obj, unsplicify=False)
-                    synthesized_obj = synthesize_obj(type(obj), merged_constraints)
-                    # No synthesized object is produced, so the best we can do is to change object attributes.
-                    if synthesized_obj is None:
-                        obj.trusted = False
-                        obj.synthesized = True
-                        obj.taints = empty_taint()
-                        obj.constraints = []
-                        obj_flagged += 1
-                    else:
-                        replaced = replace_obj(synthesized_obj, paths[id(obj)])
-                        if replaced:
-                            obj_synthesized += 1
-                        # If we cannot redirect references, the best we can do is to change object attributes.
-                        else:
-                            obj.trusted = False
-                            obj.synthesized = True
-                            obj.taints = empty_taint()
-                            obj.constraints = []
-                            # Note that the object is still synthesized (even though replacement failed).
-                            obj_synthesized += 1
+                            # Synthesize non-system-resource objects one at a time
+                            merged_constraints = concretize_and_merge_constraints(obj, unsplicify=False)
+                            synthesized_obj = synthesize_obj(type(obj), merged_constraints)
+                            # No synthesized object is produced, so the best we can do is to change object attributes.
+                            if synthesized_obj is None:
+                                obj.trusted = False
+                                obj.synthesized = True
+                                obj.taints = empty_taint()
+                                obj.constraints = []
+                                obj_flagged += 1
+                            else:
+                                replace.replace_single(obj, synthesized_obj)
+                                obj_synthesized += 1
                 print("Synthesizing {} system objects and {} non-system objects takes: {}s "
                       "(additional {} objects are only flagged but not synthesized)"
                       .format(system_obj_synthesized, obj_synthesized, time.perf_counter() - start_timer, obj_flagged))
