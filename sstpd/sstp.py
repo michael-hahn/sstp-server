@@ -113,10 +113,17 @@ class SSTPProtocol(Protocol):
                 for obj in objs:
                     # Identify all splice-able objects
                     if hasattr(obj, 'taints') and obj.taints == sid:
-                        print("[splice] splicing object: {} "
-                              "(type: {}, taints: {})".format(obj, type(obj), obj.taints))
-                        # with obj.splice() as resource:
-                        #     pass
+                        # print("[splice] splicing object: {} "
+                        #       "(type: {}, taints: {})".format(obj, type(obj), obj.taints))
+                        try:
+                            with obj.splice() as resource:
+                                # splice() will handle deletion automatically.
+                                # Developers can put more code here for defensive
+                                # programming afterwards if necessary.
+                                pass
+                        except:
+                            # TODO: Add code to delete tainted non-system resource objects.
+                            pass
                 # Respond to the client when Splice deletion is finished
                 self.transport.write(b'Splice: user %s is erased\r\n' % str(sid).encode())
                 return
