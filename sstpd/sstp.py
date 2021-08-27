@@ -191,9 +191,9 @@ class SSTPProtocol(Protocol):
                 system_obj_synthesized, obj_synthesized, obj_flagged = 0, 0, 0
                 start_timer = time.perf_counter()
                 objs = gc.get_objects()
-                print("Getting all {} heap objects takes: {}s"
-                      .format(len(objs), time.perf_counter() - start_timer))
-                start_timer = time.perf_counter()
+                self.logging.info("[splice] Getting all {} heap objects takes: {}s"
+                                  .format(len(objs), time.perf_counter() - start_timer))
+                self.logging.info("[splice] Splice deletion begins...")
                 for obj in objs:
                     # Identify all splice-able objects
                     if hasattr(obj, 'taints') and obj.taints == sid:
@@ -204,6 +204,7 @@ class SSTPProtocol(Protocol):
                                 # splice() will handle deletion automatically.
                                 # Developers can put more code here for defensive
                                 # programming afterwards if necessary.
+                                self.logging.info("[splice] Delete system object: {}".format(obj))
                                 system_obj_synthesized += 1
                         except:
                             # Synthesize non-system-resource objects one at a time
@@ -219,9 +220,7 @@ class SSTPProtocol(Protocol):
                             else:
                                 replace.replace_single(obj, synthesized_obj)
                                 obj_synthesized += 1
-                print("Synthesizing {} system objects and {} non-system objects takes: {}s "
-                      "(additional {} objects are only flagged but not synthesized)"
-                      .format(system_obj_synthesized, obj_synthesized, time.perf_counter() - start_timer, obj_flagged))
+                            self.logging.info("[splice] Delete non-system object: {}".format(obj))
                 # Respond to the client when Splice deletion is finished
                 self.transport.write(b'Splice: user %s is erased\r\n' % str(sid).encode())
                 return
