@@ -43,6 +43,9 @@ setup(
     ],
     long_description=long_description,
     python_requires='>=3.4.4',
+    install_requires=['Arpeggio==1.10.2',
+                      'guppy3==3.1.1',
+                      'z3-solver==4.8.10.0'],
     extras_require={
         'uvloop': ['uvloop>=0.8.0']
     },

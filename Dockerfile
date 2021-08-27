@@ -31,7 +31,6 @@ RUN chmod +x /usr/local/bin/iptables.sh
 RUN chmod +x run_server.sh
 # install
 RUN python3.8 setup.py install
-RUN pip3 install -r requirements.txt
 
 RUN cp options.sstpd /etc/ppp/
 RUN cp chap-secrets /etc/ppp/
