@@ -55,6 +55,8 @@ docker network ls
 # Inspect the 'client' network. This shows you its IP address and the fact that no containers are connected to it
 docker network inspect client
 # Build the docker image for SSTP server
+# NOTE: To build an SSTP server that enables SPLICE, modify __splice__ to True in the splice/ folder and build
+#       a separate container (you can name it sstp-server-splice, for example: docker build --tag sstp-server-splice .)
 docker build --tag sstp-server .
 
 # Ideally run the following in a separate console (e.g., using tmux)
