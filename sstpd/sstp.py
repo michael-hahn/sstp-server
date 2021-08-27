@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import hmac
 import hashlib
+import time
 
 from . import __version__
 from .constants import *
@@ -19,14 +20,15 @@ from .ppp import PPPDProtocol, PPPDProtocolFactory, is_ppp_control_frame, PPPDSS
 from .proxy_protocol import parse_pp_header, PPException, PPNoEnoughData
 
 # !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+import replace
+from .constraints import merge_constraints
+from .synthesis import init_synthesizer_on_type
 # Splice package is added to Python3.6/asyncio/. We will
 # use asyncio.splice module when __splice__ is set to True
 from asyncio.splice import __splice__
 if __splice__:
-    from asyncio.splice.splice import SpliceAttrMixin
-    from asyncio.splice.identity import taint_id_from_addr
-# Other imports used specific for SPLICE
-import gc
+    from asyncio.splice.splice import SpliceAttrMixin, SpliceMixin
+    from asyncio.splice.identity import taint_id_from_addr, empty_taint
 # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 HTTP_REQUEST_BUFFER_SIZE = 10 * 1024
@@ -34,6 +36,82 @@ HELLO_TIMEOUT = 60
 
 def parse_length(s):
     return ((s[0] & 0x0f) << 8) + s[1]  # Ignore R
+
+
+# !!!SPLICE =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+def concretize_and_merge_constraints(obj, unsplicify=True):
+    """
+    Return a set of concrete constraints for a Splice object.
+    For multiprocess to work, objects within the constraints
+    must be unsplicified. However, when building dependency
+    graph, objects need to keep their actual types. Therefore,
+    we make unsplificy an option in the argument.
+    """
+    # Concretize constraints for obj using symbolic
+    # constraints from its enclosing data structure.
+    concrete_constraints = []
+    # Each constraint in obj.constraints is a callable that takes
+    # the object as the only argument. Each callback function
+    # returns concrete constraints in disjunctive normal form.
+    for constraint in obj.constraints:
+        # NOTE: not unsplicify is a boolean which is used to signify
+        # that we are building constraints to create dependency graph
+        # (since we do not unsplicify when we build the graph).
+        obj_constraints = constraint(obj, not unsplicify)
+        if unsplicify:
+            # Unsplificy all Splice objects that are part of the constraint
+            for obj_constraint in obj_constraints:
+                for k, conditions in obj_constraint.items():
+                    new_conditions = []
+                    for condition in conditions:
+                        if isinstance(condition, SpliceMixin):
+                            new_conditions.append(condition.unsplicify())
+                        else:
+                            new_conditions.append(condition)
+                    obj_constraint[k] = new_conditions
+            concrete_constraints.append(obj_constraints)
+        else:
+            concrete_constraints.append(obj_constraints)
+    # Merge all concrete constraints, if needed
+    if not concrete_constraints:
+        merged_constraints = None
+    else:
+        merged_constraints = concrete_constraints[0]
+        for concrete_constraint in concrete_constraints[1:]:
+            merged_constraints = merge_constraints(merged_constraints, concrete_constraint)
+    return merged_constraints
+
+
+def synthesize_obj(obj_type, constraints):
+    """
+    Synthesize a new object based on its constraints.
+    It is possible that synthesis does not succeed because
+    for example constraints have conflicts. In such a case,
+    None is returned.
+    """
+    if constraints is not None:
+        synthesizer = init_synthesizer_on_type(obj_type)
+        # start_time = time.perf_counter()
+        synthesized_obj = synthesizer.splice_synthesis(constraints)
+        # logger.info("Synthesizing one object takes: {}".format(time.perf_counter() - start_time))
+        return synthesized_obj
+    return None
+
+
+def replace_obj(obj, references):
+    """Redirect all references to obj. If redirection succeeds, return True; otherwise, False."""
+    # Perform object replacement for objects that have a synthesized version
+    # We use guppy. Note that using ctypes.memmove does not seem to work (leads to segfault).
+    # ctypes.memmove(id(obj), id(synthesized_obj), object.__sizeof__(obj))
+    # ctypes.memmove ref: https://docs.python.org/2/library/ctypes.html#ctypes.memmove
+    try:
+        replace.replace(obj, references)
+        return True
+    except:
+        # Replacement should not fail, but just in case it fails, we want to know.
+        print("**** replacing {} failed ****".format(obj))
+    return False
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 
 class State(Enum):
@@ -109,7 +187,14 @@ class SSTPProtocol(Protocol):
                 # Get the taint of the user (int) to be spliced
                 sid = int(data.decode("utf-8").strip().split(':')[1])
                 # Splice deletion code
-                objs = gc.get_objects()
+                # to_replace holds a list of *old* non-system objects to be synthesized
+                to_replace = []
+                system_obj_synthesized, obj_synthesized, obj_flagged = 0, 0, 0
+                start_timer = time.perf_counter()
+                objs = replace.get_objects()    # use guppy
+                print("Getting all {} heap objects takes: {}s"
+                      .format(len(objs), time.perf_counter() - start_timer))
+                start_timer = time.perf_counter()
                 for obj in objs:
                     # Identify all splice-able objects
                     if hasattr(obj, 'taints') and obj.taints == sid:
@@ -120,10 +205,38 @@ class SSTPProtocol(Protocol):
                                 # splice() will handle deletion automatically.
                                 # Developers can put more code here for defensive
                                 # programming afterwards if necessary.
-                                pass
+                                system_obj_synthesized += 1
                         except:
-                            # TODO: Add code to delete tainted non-system resource objects.
-                            pass
+                            # Gather all non-system-resource objects for data synthesis
+                            to_replace.append(obj)
+                # Get referrers of all objs that must be replaced. "paths" is a dictionary that maps
+                # an object ID (for objects in to_replace) to all the paths of the object's referrers.
+                paths = replace.get_path_map(to_replace)
+                for obj in to_replace:
+                    merged_constraints = concretize_and_merge_constraints(obj, unsplicify=False)
+                    synthesized_obj = synthesize_obj(type(obj), merged_constraints)
+                    # No synthesized object is produced, so the best we can do is to change object attributes.
+                    if synthesized_obj is None:
+                        obj.trusted = False
+                        obj.synthesized = True
+                        obj.taints = empty_taint()
+                        obj.constraints = []
+                        obj_flagged += 1
+                    else:
+                        replaced = replace_obj(synthesized_obj, paths[id(obj)])
+                        if replaced:
+                            obj_synthesized += 1
+                        # If we cannot redirect references, the best we can do is to change object attributes.
+                        else:
+                            obj.trusted = False
+                            obj.synthesized = True
+                            obj.taints = empty_taint()
+                            obj.constraints = []
+                            # Note that the object is still synthesized (even though replacement failed).
+                            obj_synthesized += 1
+                print("Synthesizing {} system objects and {} non-system objects takes: {}s "
+                      "(additional {} objects are only flagged but not synthesized)"
+                      .format(system_obj_synthesized, obj_synthesized, time.perf_counter() - start_timer, obj_flagged))
                 # Respond to the client when Splice deletion is finished
                 self.transport.write(b'Splice: user %s is erased\r\n' % str(sid).encode())
                 return
