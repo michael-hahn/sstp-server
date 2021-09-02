@@ -45,17 +45,11 @@ do
 done
 
 # Monitor SSTP server and Puppeteer clients CPU utilization and memory usage and others
-PUPPETEER_NAMES=""
-COUNTER=1
-while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
-do
-  PUPPETEER_NAMES+="puppeteer-${COUNTER} "
-  ((COUNTER++))
-done
+# TODO: For some reason, cannot specify puppeteer containers through string concatenation to stats; just capture all running containers for now
 if ${WITH_SPLICE}; then
-  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice "${PUPPETEER_NAMES}" >> data/cpumem-splice.log &
+  docker stats --format "table {{.Name}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" >> data/cpumem-splice.log &
 else
-  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server "${PUPPETEER_NAMES}" >> data/cpumem.log &
+  docker stats --format "table {{.Name}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" >> data/cpumem.log &
 fi
 
 echo "[STATUS] all web clients are running; they will be destroyed after they are finished."
