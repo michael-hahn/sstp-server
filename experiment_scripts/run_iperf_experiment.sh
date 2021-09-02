@@ -16,12 +16,13 @@
 # Parse the flag(s)
 WITH_SPLICE='false'
 UDP='false'
-while getopts s:n:u: flag
+while getopts s:n:u:R: flag
 do
   case "${flag}" in
     s) WITH_SPLICE=${OPTARG};;
     u) UDP=${OPTARG};;
     n) NUM_CLIENTS=${OPTARG};;
+    R) RUNTIME=${OPTARG};;
     *) echo "UNKNOWN OPTION --> ${OPTKEY}" >&2
        exit 1;;
   esac
@@ -76,10 +77,10 @@ do
   # -J: Output in JSON format for easy parsing of results
   if ${UDP}; then
     docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
-    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -u -b 0 -t 60 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-udp.json
+    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -u -b 0 -t "${RUNTIME}" -V --get-server-output -J --logfile /var/"${LOG_NAME}"-udp.json
   else
     docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
-    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -t 62 -O 2 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-tcp.json
+    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -t "${RUNTIME}" -O 2 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-tcp.json
   fi
   ((COUNTER++))
   ((IP_SUFFIX++))
