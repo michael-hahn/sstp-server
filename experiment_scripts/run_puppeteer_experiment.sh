@@ -9,13 +9,15 @@
 # This script does *not* contain code to clean up after the experiment is finished.
 
 # This script takes the following flag(s):
+# -s true/false: if set, the SSTP server is running with SPLICE (default is false)
 # -n NUM_CLIENTS: number of web clients (which is the same number of SSTP clients)
 # -f js file: the name of the Node.js puppeteer file (the file must be in the puppeteer folder)
 
 # Parse the flag(s)
-while getopts n:f: flag
+while getopts s:n:f: flag
 do
   case "${flag}" in
+    s) WITH_SPLICE=${OPTARG};;
     n) NUM_CLIENTS=${OPTARG};;
     f) PUPPETEER_FILE=${OPTARG};;
     *) echo "UNKNOWN OPTION --> ${OPTKEY}" >&2
