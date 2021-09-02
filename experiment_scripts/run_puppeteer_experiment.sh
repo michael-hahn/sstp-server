@@ -42,5 +42,19 @@ do
   ((COUNTER++))
 done
 
+# Monitor SSTP server and Puppeteer clients CPU utilization and memory usage and others
+PUPPETEER_NAMES=""
+COUNTER=1
+while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
+do
+  PUPPETEER_NAMES+="puppeteer-${COUNTER} "
+  ((COUNTER++))
+done
+if ${WITH_SPLICE}; then
+  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice "${PUPPETEER_NAMES}" >> cpumem-splice.json &
+else
+  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server "${PUPPETEER_NAMES}" >> cpumem.json &
+fi
+
 echo "[STATUS] all web clients are running; they will be destroyed after they are finished."
 echo "[HINT] do not forget to run clean up scripts to clean up after the experiment is finished."

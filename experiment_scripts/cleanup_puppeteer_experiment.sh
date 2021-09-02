@@ -21,6 +21,10 @@ do
   esac
 done
 
+# Stop docker stats process
+pid=$(ps aux | grep "docker stats" | grep -v grep | awk '{print $2}')
+kill -9 "${pid}"
+
 docker container stop web-server
 
 echo "[STATUS] Puppeteer clean up is finished."
