@@ -22,6 +22,10 @@ do
   esac
 done
 
+# Stop docker stats process
+pid=$(ps aux | grep "docker stats" | grep -v grep | awk '{print $2}')
+kill -9 "${pid}"
+
 # Stop the running iPerf servers
 COUNTER=1
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]

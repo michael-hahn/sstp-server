@@ -87,5 +87,12 @@ do
   ((IP_SUFFIX++))
 done
 
+# Monitor SSTP server CPU utilization and memory usage and others
+if ${WITH_SPLICE}; then
+  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice >> cpumem-splice.json &
+else
+  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server >> cpumem.json &
+fi
+
 echo "[STATUS] all iPerf3 clients are running; they will be destroyed after they are finished."
 echo "[HINT] do not forget to run clean up scripts to clean up after the experiment is finished."
