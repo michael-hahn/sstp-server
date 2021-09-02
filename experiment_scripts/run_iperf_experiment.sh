@@ -12,6 +12,7 @@
 # -s true/false: if set to true, the SSTP server is running with SPLICE (default is false)
 # -n NUM_CLIENTS: number of iperf3 clients (which is the same number of SSTP clients and iperf3 servers)
 # -u true/false: if set to true, use UDP instead of TCP
+# -R RUNTIME: seconds to run the experiment
 
 # Parse the flag(s)
 WITH_SPLICE='false'
