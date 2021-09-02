@@ -45,6 +45,7 @@ if [ "${WITH_SPLICE}" = "true" ]; then
   NEW_FOLDER+="-splice"
 fi
 mkdir ${NEW_FOLDER}
-mv *.json ${NEW_FOLDER}
+cd ..
+mv *.json data/${NEW_FOLDER}
 
 echo "[STATUS] all experimental data is moved to data/${NEW_FOLDER}"
