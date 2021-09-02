@@ -53,9 +53,9 @@ do
   ((COUNTER++))
 done
 if ${WITH_SPLICE}; then
-  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice "${PUPPETEER_NAMES}" >> cpumem-splice.json &
+  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice "${PUPPETEER_NAMES}" >> data/cpumem-splice.log &
 else
-  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server "${PUPPETEER_NAMES}" >> cpumem.json &
+  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server "${PUPPETEER_NAMES}" >> data/cpumem.log &
 fi
 
 echo "[STATUS] all web clients are running; they will be destroyed after they are finished."

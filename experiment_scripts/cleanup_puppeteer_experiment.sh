@@ -43,5 +43,6 @@ fi
 mkdir ${NEW_FOLDER}
 cd ..
 mv ../puppeteer/data/metrics-* data/${NEW_FOLDER}
+mv ../puppeteer/data/*.log data/${NEW_FOLDER}
 
 echo "[STATUS] all experimental data is moved to data/${NEW_FOLDER}"
