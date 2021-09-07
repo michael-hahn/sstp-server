@@ -44,7 +44,7 @@ while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   IPERF_SERVER_IP=${IPERF_SERVER_IP_BASE}${IP_SUFFIX}
   echo "[STATUS] setting up iPerf3 server: iperf-server-${COUNTER}..."
-  docker run -d --rm --cpuset-cpus="3" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} networkstatic/iperf3 -s -J
+  docker run -d --rm --cpuset-cpus="7-10" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} networkstatic/iperf3 -s -J
   ((COUNTER++))
   ((IP_SUFFIX++))
 done
@@ -77,10 +77,10 @@ do
   # --get-server-output: Retrieve the server-side output
   # -J: Output in JSON format for easy parsing of results
   if ${UDP}; then
-    docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+    docker run -d --rm --cpuset-cpus="11-15" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
     networkstatic/iperf3 -c ${IPERF_SERVER_IP} -u -b 0 -t "${RUNTIME}" -V --get-server-output -J --logfile /var/"${LOG_NAME}"-udp.json
   else
-    docker run -d --rm --cpuset-cpus="2" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+    docker run -d --rm --cpuset-cpus="11-15" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
     networkstatic/iperf3 -c ${IPERF_SERVER_IP} -t "${RUNTIME}" -O 2 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-tcp.json
   fi
   ((COUNTER++))
@@ -96,3 +96,5 @@ fi
 
 echo "[STATUS] all iPerf3 clients are running; they will be destroyed after they are finished."
 echo "[HINT] do not forget to run clean up scripts to clean up after the experiment is finished."
+
+sleep "${RUNTIME}"
