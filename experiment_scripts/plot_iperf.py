@@ -20,9 +20,9 @@ def bandwidth_fig(clients, bandwidths, bandwidths_with_splice, outfile):
     # Plot data
     d = np.array(bandwidths)
     d_s = np.array(bandwidths_with_splice)
-    ax.plot(x, d, color=mcolors.CSS4_COLORS['darkblue'], marker='x', label='w/o Splice')
+    ax.plot(x, d, color=mcolors.CSS4_COLORS['darkblue'], marker='x', label='Baseline')
     ax.plot(x, d_s, color=mcolors.CSS4_COLORS['darkgreen'], marker='^',
-            label='w/ Splice')
+            label='Splice')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel('# of Concurrent iPerf Clients')
@@ -68,8 +68,8 @@ def parse_workload_data(clients, outfile):
         bandwidth_l_s = 0.0
         for i in range(client):
             fp = "./data/iperf-{}-udp/{}{}-{}-udp.json".format(client, client_ip_base, client_ip_suffix + i, client)
-            fp_splice = "./data/iperf-{}-udp-splice/{}{}-{}-udp.json".format(client, client_ip_base,
-                                                                              client_ip_suffix + i, client)
+            fp_splice = "./data/iperf-{}-udp-splice/{}{}-{}-splice-udp.json".format(client, client_ip_base,
+                                                                                    client_ip_suffix + i, client)
             r = parse_iperf_stats(fp)
             r_s = parse_iperf_stats(fp_splice)
 
