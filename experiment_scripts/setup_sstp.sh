@@ -39,13 +39,14 @@ fi
 echo "[STATUS] docker networks are ready."
 
 # Run the SSTP server container and connect the server to both the client and the server network.
+# Add sys_ptrace for profiling purposes only. The server performance is limited by the main SSTP process.
 if ${WITH_SPLICE}; then
   echo "[STATUS] setting up SSTP server: sstp-server-splice..."
-  docker run -d --rm --cpuset-cpus="0-4" --network client --ip="172.19.0.2" --name=sstp-server-splice --privileged sstp-server-splice
+  docker run -d --rm --cpuset-cpus="0,1" --network client --ip="172.19.0.2" --cap-add sys_ptrace --name=sstp-server-splice --privileged sstp-server-splice
   docker network connect --ip="172.18.0.2" server sstp-server-splice
 else
   echo "[STATUS] setting up SSTP server: sstp-server..."
-  docker run -d --rm --cpuset-cpus="0-4" --network client --ip="172.19.0.2" --name=sstp-server --privileged sstp-server
+  docker run -d --rm --cpuset-cpus="0,1" --network client --ip="172.19.0.2" --cap-add sys_ptrace --name=sstp-server --privileged sstp-server
   docker network connect --ip="172.18.0.2" server sstp-server
 fi
 echo "[STATUS] SSTP server is ready."
@@ -62,7 +63,7 @@ while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   SSTP_CLIENT_IP=${SSTP_CLIENT_IP_BASE}${IP_SUFFIX}
   echo "[STATUS] setting up SSTP client: sstp-client-${COUNTER}..."
-  docker run -d --rm --cpuset-cpus="5,6" --privileged --network client --ip=${SSTP_CLIENT_IP} --name=sstp-client-${COUNTER} sstp-client
+  docker run -d --rm --cpuset-cpus="2,3" --privileged --network client --ip=${SSTP_CLIENT_IP} --name=sstp-client-${COUNTER} sstp-client
   ((COUNTER++))
   ((IP_SUFFIX++))
 done

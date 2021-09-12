@@ -33,15 +33,31 @@ echo "[STATUS] the web server is ready."
 # Wait a little bit until the web server is set up
 sleep 5
 
-# Run NUM_CLIENTS web clients in the puppeteer folder
+# Run the rest of the code in the puppeteer folder
 cd ../puppeteer
+
+# Get the pid of the server process (to monitor its CPU and memory usage)
+pid=$(ps aux | grep "run.py" | grep -v grep | awk '{print $2}')
+# Monitor using top every second and parse the comma-separated output with awk (pin to core 4)
+# The format is: TIME,PID,VIRT,RES,%CPU,%MEM
+taskset 0x10 top -b -n 60 -d 1 -p "${pid}" | awk -v OFS=',' '$1=="top" { time=$3 } $1+0>0 { print time,$1,$5,$6,$9,$10; fflush(); }' >> data/"${NUM_CLIENTS}"_server-cpumem.log &
+
+# Run NUM_CLIENTS web clients
 COUNTER=1
+CPU1=5
+CPU2=6
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
-  docker run -d --init --rm --cpuset-cpus="2" --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
+  # Change the log file path (by replacement using sed) so that each puppeteer process will write to a separate log file
+  path_line="const logpath = dir.concat(${COUNTER}, '.json');"
+  sed -i "17s;.*;${path_line};" "${PUPPETEER_FILE}"
+
+  docker run -d --init --rm --cpus="4" -e cupload=100 --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
   --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)"/data,target=/home/pptruser/Downloads \
   puppeteer node -e "$(cat "${PUPPETEER_FILE}")"
   ((COUNTER++))
+  CPU1=$(( "${CPU1}" + 2 ))
+  CPU2=$(( "${CPU2}" + 2 ))
 done
 
 # Monitor SSTP server and Puppeteer clients CPU utilization and memory usage and others
@@ -54,3 +70,16 @@ fi
 
 echo "[STATUS] all web clients are running; they will be destroyed after they are finished."
 echo "[HINT] do not forget to run clean up scripts to clean up after the experiment is finished."
+
+# Check if any puppeteer container is running every second and finishes running if and only if all puppeteer containers are done
+COUNTER=1
+while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
+do
+  while [ "$( docker container inspect -f '{{.State.Running}}' puppeteer-${COUNTER} )" == "true" ]
+  do
+    echo "[STATUS] waiting for puppeteer-${COUNTER} to finish..."
+    sleep 1
+  done
+  ((COUNTER++))
+done
+

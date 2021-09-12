@@ -27,6 +27,12 @@ kill -9 "${pid}"
 
 docker container stop web-server
 
+# Stop the puppeteer containers just in case (it's OK if the command fails when the container has already been stopped)
+for (( i=1; i<=${NUM_CLIENTS}; i++ ))
+do
+  docker container stop puppeteer-"${i}"
+done
+
 echo "[STATUS] Puppeteer clean up is finished."
 
 mkdir -p data/
@@ -42,7 +48,8 @@ if [ "${WITH_SPLICE}" = "true" ]; then
 fi
 mkdir ${NEW_FOLDER}
 cd ..
-mv ../puppeteer/data/metrics-* data/${NEW_FOLDER}
+mv ../puppeteer/data/*.json data/${NEW_FOLDER}
 mv ../puppeteer/data/*.log data/${NEW_FOLDER}
+# mv ../puppeteer/data/*.png data/${NEW_FOLDER}
 
 echo "[STATUS] all experimental data is moved to data/${NEW_FOLDER}"
