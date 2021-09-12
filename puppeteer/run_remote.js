@@ -13,26 +13,27 @@ const path = require('path');
         ]
     });
 
-    const page = await browser.newPage();
-    // Note: SSL not set up so do not use https!
-    await page.goto("http://cnn.com");  // remote: CNN.com
-    // Get some metrics. Ref: https://github.com/puppeteer/puppeteer/blob/main/docs/api.md#pagemetrics
-    const metrics = await page.metrics();
-    console.log("Logging metrics to %s", metrics.Timestamp);
     const dir = "/home/pptruser/Downloads/";
-    // Code to check if a dir exists and writable
-    // fs.access(dir, fs.constants.F_OK | fs.constants.W_OK, (err) => {
-    //     if (err) {
-    //         console.log("%s doesn't exist or not writable", dir);
-    //     } else {
-    //         console.log('can write to %s', dir);
-    //     }
-    // });
-    // Create a unique pathname to store metrics data
-    const path = dir.concat("metrics-", metrics.Timestamp.toString(), ".json");
-    fs.writeFileSync(path, JSON.stringify(metrics, null, "  "));
-    // await page.screenshot({path: "screenshot.png"});
-
-    await page.close();
+    const logpath = dir.concat(2, '.json')
+    const times = 10;
+    for (let i = 0; i < times; i++) {
+      const page = await browser.newPage({ context: "user-" + i });
+      // Configure the navigation timeout
+      await page.setDefaultNavigationTimeout(0);
+      await page.setCacheEnabled(false);
+      // We will wait until the page is fully loaded.
+      const response = await page.goto("http://stackoverflow.com");//, {waitUtil: 'domcontentloaded'});
+      const timing = await page.evaluate(() => {
+        const result = {};
+        for (const key of Object.keys(window.performance.timing.__proto__))
+          result[key] = window.performance.timing[key];
+        return result;
+      });
+      fs.appendFileSync(logpath, JSON.stringify(timing, null, "  "));
+      
+      // await page.screenshot({path: '/home/pptruser/Downloads/screenshot_' + i + '.png'});
+      await page.close();
+    }
     await browser.close();
 })();
+
