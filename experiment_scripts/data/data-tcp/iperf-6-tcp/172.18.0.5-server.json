@@ -1,0 +1,75 @@
+-----------------------------------------------------------
+Server listening on 5201
+-----------------------------------------------------------
+Accepted connection from 172.18.0.2, port 56086
+[  6] local 172.18.0.5 port 5201 connected to 172.18.0.2 port 56088
+[ ID] Interval           Transfer     Bitrate
+[  6]   0.00-1.00   sec  12.8 MBytes   108 Mbits/sec                  (omitted)
+[  6]   1.00-1.00   sec  11.5 MBytes  48.3 Mbits/sec                  
+[  6]   1.00-2.00   sec  10.5 MBytes  88.5 Mbits/sec                  
+[  6]   2.00-3.00   sec  9.54 MBytes  80.0 Mbits/sec                  
+[  6]   3.00-4.00   sec  9.64 MBytes  80.9 Mbits/sec                  
+[  6]   4.00-5.00   sec  9.62 MBytes  80.7 Mbits/sec                  
+[  6]   5.00-6.00   sec  7.39 MBytes  62.0 Mbits/sec                  
+[  6]   6.00-7.00   sec  8.23 MBytes  69.0 Mbits/sec                  
+[  6]   7.00-8.01   sec  10.4 MBytes  87.0 Mbits/sec                  
+[  6]   8.01-9.00   sec  7.79 MBytes  65.6 Mbits/sec                  
+[  6]   9.00-10.00  sec  8.67 MBytes  72.7 Mbits/sec                  
+[  6]  10.00-11.00  sec  11.5 MBytes  96.0 Mbits/sec                  
+[  6]  11.00-12.00  sec  8.13 MBytes  68.2 Mbits/sec                  
+[  6]  12.00-13.00  sec  7.72 MBytes  64.8 Mbits/sec                  
+[  6]  13.00-14.00  sec  10.7 MBytes  89.7 Mbits/sec                  
+[  6]  14.00-15.00  sec  11.0 MBytes  92.2 Mbits/sec                  
+[  6]  15.00-16.00  sec  7.82 MBytes  65.5 Mbits/sec                  
+[  6]  16.00-17.00  sec  9.74 MBytes  81.7 Mbits/sec                  
+[  6]  17.00-18.00  sec  7.71 MBytes  64.7 Mbits/sec                  
+[  6]  18.00-19.00  sec  9.07 MBytes  76.1 Mbits/sec                  
+[  6]  19.00-20.00  sec  8.45 MBytes  70.8 Mbits/sec                  
+[  6]  20.00-21.00  sec  8.00 MBytes  67.1 Mbits/sec                  
+[  6]  21.00-22.00  sec  11.1 MBytes  93.5 Mbits/sec                  
+[  6]  22.00-23.00  sec  12.1 MBytes   101 Mbits/sec                  
+[  6]  23.00-24.00  sec  10.2 MBytes  85.5 Mbits/sec                  
+[  6]  24.00-25.00  sec  11.2 MBytes  94.0 Mbits/sec                  
+[  6]  25.00-26.01  sec  9.35 MBytes  77.3 Mbits/sec                  
+[  6]  26.01-27.00  sec  9.61 MBytes  81.8 Mbits/sec                  
+[  6]  27.00-28.00  sec  9.55 MBytes  80.1 Mbits/sec                  
+[  6]  28.00-29.00  sec  9.23 MBytes  77.5 Mbits/sec                  
+[  6]  29.00-30.00  sec  9.45 MBytes  79.3 Mbits/sec                  
+[  6]  30.00-31.00  sec  6.37 MBytes  53.4 Mbits/sec                  
+[  6]  31.00-32.00  sec  8.37 MBytes  70.2 Mbits/sec                  
+[  6]  32.00-33.00  sec  9.68 MBytes  81.2 Mbits/sec                  
+[  6]  33.00-34.00  sec  10.5 MBytes  87.7 Mbits/sec                  
+[  6]  34.00-35.00  sec  11.4 MBytes  95.7 Mbits/sec                  
+[  6]  35.00-36.00  sec  10.1 MBytes  84.5 Mbits/sec                  
+[  6]  36.00-37.00  sec  9.31 MBytes  78.1 Mbits/sec                  
+[  6]  37.00-38.00  sec  10.7 MBytes  90.1 Mbits/sec                  
+[  6]  38.00-39.00  sec  10.4 MBytes  87.1 Mbits/sec                  
+[  6]  39.00-40.00  sec  9.64 MBytes  80.9 Mbits/sec                  
+[  6]  40.00-41.00  sec  10.6 MBytes  88.7 Mbits/sec                  
+[  6]  41.00-42.01  sec  10.6 MBytes  88.2 Mbits/sec                  
+[  6]  42.01-43.00  sec  8.76 MBytes  73.9 Mbits/sec                  
+[  6]  43.00-44.00  sec  10.3 MBytes  86.2 Mbits/sec                  
+[  6]  44.00-45.00  sec  9.16 MBytes  76.9 Mbits/sec                  
+[  6]  45.00-46.00  sec  8.97 MBytes  75.2 Mbits/sec                  
+[  6]  46.00-47.00  sec  7.04 MBytes  59.1 Mbits/sec                  
+[  6]  47.00-48.00  sec  6.70 MBytes  56.2 Mbits/sec                  
+[  6]  48.00-49.00  sec  8.79 MBytes  73.7 Mbits/sec                  
+[  6]  49.00-50.00  sec  9.08 MBytes  76.2 Mbits/sec                  
+[  6]  50.00-51.00  sec  8.37 MBytes  70.2 Mbits/sec                  
+[  6]  51.00-52.00  sec  8.02 MBytes  67.3 Mbits/sec                  
+[  6]  52.00-53.00  sec  8.09 MBytes  67.8 Mbits/sec                  
+[  6]  53.00-54.01  sec  9.83 MBytes  82.0 Mbits/sec                  
+[  6]  54.01-55.00  sec  9.89 MBytes  83.4 Mbits/sec                  
+[  6]  55.00-56.00  sec  9.08 MBytes  76.2 Mbits/sec                  
+[  6]  56.00-57.00  sec  9.23 MBytes  77.4 Mbits/sec                  
+[  6]  57.00-58.00  sec  10.1 MBytes  84.6 Mbits/sec                  
+[  6]  58.00-59.00  sec  9.52 MBytes  79.9 Mbits/sec                  
+[  6]  59.00-60.00  sec  10.2 MBytes  85.3 Mbits/sec                  
+[  6]  60.00-60.01  sec  24.0 KBytes  28.4 Mbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate
+[  6]   0.00-60.01  sec   564 MBytes  78.8 Mbits/sec                  receiver
+-----------------------------------------------------------
+Server listening on 5201
+-----------------------------------------------------------
+iperf3: interrupt - the server has terminated

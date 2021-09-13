@@ -52,7 +52,7 @@ do
   path_line="const logpath = dir.concat(${COUNTER}, '.json');"
   sed -i "17s;.*;${path_line};" "${PUPPETEER_FILE}"
 
-  docker run -d --init --rm --cpus="4" -e cupload=100 --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
+  docker run -d --init --rm --cpus="2" -e cupload=100 --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
   --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)"/data,target=/home/pptruser/Downloads \
   puppeteer node -e "$(cat "${PUPPETEER_FILE}")"
   ((COUNTER++))

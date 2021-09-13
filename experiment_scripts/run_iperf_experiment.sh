@@ -44,7 +44,8 @@ while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   IPERF_SERVER_IP=${IPERF_SERVER_IP_BASE}${IP_SUFFIX}
   echo "[STATUS] setting up iPerf3 server: iperf-server-${COUNTER}..."
-  docker run -d --rm --cpuset-cpus="7-10" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} networkstatic/iperf3 -s -J
+  docker run -d --rm --cpuset-cpus="4,5" --network=server --ip=${IPERF_SERVER_IP} --name=iperf-server-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+  networkstatic/iperf3 --logfile /var/"${IPERF_SERVER_IP}"-server.json -s 
   ((COUNTER++))
   ((IP_SUFFIX++))
 done
@@ -53,9 +54,23 @@ echo "[STATUS] ${NUM_CLIENTS} iPerf3 servers are ready."
 # Wait a little bit until all iPerf3 servers are set up
 sleep 10
 
+# Get the pid of the server process (to monitor its CPU and memory usage)
+pid=$(ps aux | grep "run.py" | grep -v grep | awk '{print $2}')
+# Monitor using top every second and parse the comma-separated output with awk (pin to core 4)
+# The format is: TIME,PID,VIRT,RES,%CPU,%MEM
+taskset 0x10 top -b -n "${RUNTIME}" -d 1 -p "${pid}" | awk -v OFS=',' '$1=="top" { time=$3 } $1+0>0 { print time,$1,$5,$6,$9,$10; fflush(); }' >> "${NUM_CLIENTS}"_cpumem.json &
+
 # Run NUM_CLIENTS iperf clients
 IP_SUFFIX=3
 COUNTER=1
+# Each client gets a single core
+CPU=6
+# With and without Splice, we will have different window size for TCP
+if ${WITH_SPLICE}; then
+  WINDOW=3900K
+else
+  WINDOW=4096K
+fi
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   IPERF_SERVER_IP=${IPERF_SERVER_IP_BASE}${IP_SUFFIX}
@@ -77,24 +92,26 @@ do
   # --get-server-output: Retrieve the server-side output
   # -J: Output in JSON format for easy parsing of results
   if ${UDP}; then
-    docker run -d --rm --cpuset-cpus="11-15" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
-    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -u -b 0 -t "${RUNTIME}" -V --get-server-output -J --logfile /var/"${LOG_NAME}"-udp.json
+    docker run -d --rm --cpuset-cpus="${CPU}" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -u -b 0 -t "${RUNTIME}" -V --get-server-output --logfile /var/"${LOG_NAME}"-udp.json
   else
-    docker run -d --rm --cpuset-cpus="11-15" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
-    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -t "${RUNTIME}" -O 2 -V --get-server-output -J --logfile /var/"${LOG_NAME}"-tcp.json
+    docker run -d --rm --cpuset-cpus="${CPU}" --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)",target=/var \
+    networkstatic/iperf3 -c ${IPERF_SERVER_IP} -t "${RUNTIME}" -O 2 -w "${WINDOW}" -V --get-server-output --logfile /var/"${LOG_NAME}"-tcp.json
   fi
   ((COUNTER++))
   ((IP_SUFFIX++))
+  ((CPU++))
 done
 
-# Monitor SSTP server CPU utilization and memory usage and others
-if ${WITH_SPLICE}; then
-  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice >> cpumem-splice.json &
-else
-  docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server >> cpumem.json &
-fi
+# Monitor SSTP server CPU utilization and memory usage and others (We will use top instead, see above)
+# if ${WITH_SPLICE}; then
+#   docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server-splice >> cpumem-splice.json &
+# else
+#   docker stats --format "table {{.Container}},{{.CPUPerc}},{{.MemPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}}" sstp-server >> cpumem.json &
+# fi
 
 echo "[STATUS] all iPerf3 clients are running; they will be destroyed after they are finished."
 echo "[HINT] do not forget to run clean up scripts to clean up after the experiment is finished."
 
 sleep "${RUNTIME}"
+sleep 5
