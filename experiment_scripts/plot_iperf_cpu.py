@@ -122,4 +122,5 @@ def parse_all_data(clients, experiment, outfile):
 
 if __name__ == '__main__':
     parse_all_data([1, 2, 4, 6, 8, 10], 'tcp','tcp')
+    parse_all_data([1, 2, 4, 6, 8], 'udp', 'udp')
 

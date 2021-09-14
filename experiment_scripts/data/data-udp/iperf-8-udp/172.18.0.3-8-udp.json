@@ -1,0 +1,68 @@
+iperf 3.6
+Linux bfa7737e3d58 5.4.0-81-generic #91~18.04.1-Ubuntu SMP Fri Jul 23 13:36:29 UTC 2021 x86_64
+Time: Thu, 09 Sep 2021 23:28:17 GMT
+Connecting to host 172.18.0.3, port 5201
+      Cookie: h5vco7dmof2occ3r44rhgzu3bnx7bomeqf2z
+[  6] local 192.168.20.2 port 58350 connected to 172.18.0.3 port 5201
+Starting Test: protocol: UDP, 1 streams, 1448 byte blocks, omitting 0 seconds, 60 second test, tos 0
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  6]   0.00-1.00   sec  57.3 MBytes   481 Mbits/sec  41490  
+[  6]   1.00-2.00   sec  42.3 MBytes   355 Mbits/sec  30620  
+[  6]   2.00-3.00   sec  41.7 MBytes   349 Mbits/sec  30170  
+[  6]   3.00-4.00   sec  36.7 MBytes   308 Mbits/sec  26550  
+[  6]   4.00-5.00   sec  27.0 MBytes   226 Mbits/sec  19530  
+[  6]   5.00-6.00   sec  23.5 MBytes   197 Mbits/sec  17030  
+[  6]   6.00-7.00   sec  20.6 MBytes   173 Mbits/sec  14940  
+[  6]   7.00-8.00   sec  23.5 MBytes   197 Mbits/sec  17020  
+[  6]   8.00-9.00   sec  22.7 MBytes   191 Mbits/sec  16450  
+[  6]   9.00-10.00  sec  23.7 MBytes   198 Mbits/sec  17130  
+[  6]  10.00-11.00  sec  22.5 MBytes   189 Mbits/sec  16320  
+[  6]  11.00-12.00  sec  23.3 MBytes   195 Mbits/sec  16860  
+[  6]  12.00-13.00  sec  27.0 MBytes   227 Mbits/sec  19560  
+[  6]  13.00-14.00  sec  22.4 MBytes   188 Mbits/sec  16210  
+[  6]  14.00-15.00  sec  25.4 MBytes   213 Mbits/sec  18420  
+[  6]  15.00-16.00  sec  27.9 MBytes   234 Mbits/sec  20170  
+[  6]  16.00-17.00  sec  22.6 MBytes   190 Mbits/sec  16400  
+[  6]  17.00-18.00  sec  25.3 MBytes   213 Mbits/sec  18350  
+[  6]  18.00-19.00  sec  26.9 MBytes   226 Mbits/sec  19500  
+[  6]  19.00-20.00  sec  26.2 MBytes   220 Mbits/sec  18980  
+[  6]  20.00-21.00  sec  22.5 MBytes   189 Mbits/sec  16300  
+[  6]  21.00-22.00  sec  25.7 MBytes   216 Mbits/sec  18610  
+[  6]  22.00-23.00  sec  26.7 MBytes   224 Mbits/sec  19360  
+[  6]  23.00-24.00  sec  22.8 MBytes   191 Mbits/sec  16500  
+[  6]  24.00-25.00  sec  27.2 MBytes   228 Mbits/sec  19700  
+[  6]  25.00-26.00  sec  27.0 MBytes   226 Mbits/sec  19530  
+[  6]  26.00-27.00  sec  21.6 MBytes   182 Mbits/sec  15670  
+[  6]  27.00-28.00  sec  27.1 MBytes   227 Mbits/sec  19590  
+[  6]  28.00-29.00  sec  27.0 MBytes   227 Mbits/sec  19560  
+[  6]  29.00-30.00  sec  28.0 MBytes   235 Mbits/sec  20260  
+[  6]  30.00-31.00  sec  27.3 MBytes   229 Mbits/sec  19790  
+[  6]  31.00-32.00  sec  23.2 MBytes   195 Mbits/sec  16810  
+[  6]  32.00-33.00  sec  25.2 MBytes   212 Mbits/sec  18270  
+[  6]  33.00-34.00  sec  27.6 MBytes   231 Mbits/sec  19970  
+[  6]  34.00-35.00  sec  26.0 MBytes   218 Mbits/sec  18810  
+[  6]  35.00-36.00  sec  26.1 MBytes   219 Mbits/sec  18880  
+[  6]  36.00-37.00  sec  27.7 MBytes   233 Mbits/sec  20090  
+[  6]  37.00-38.00  sec  21.3 MBytes   178 Mbits/sec  15400  
+[  6]  38.00-39.00  sec  27.3 MBytes   229 Mbits/sec  19770  
+[  6]  39.00-40.00  sec  23.7 MBytes   198 Mbits/sec  17160  
+[  6]  40.00-41.00  sec  25.7 MBytes   216 Mbits/sec  18580  
+[  6]  41.00-42.00  sec  21.6 MBytes   182 Mbits/sec  15670  
+[  6]  42.00-43.00  sec  27.7 MBytes   232 Mbits/sec  20040  
+[  6]  43.00-44.00  sec  27.7 MBytes   232 Mbits/sec  20070  
+[  6]  44.00-45.00  sec  25.4 MBytes   213 Mbits/sec  18380  
+[  6]  45.00-46.00  sec  28.3 MBytes   237 Mbits/sec  20460  
+[  6]  46.00-47.00  sec  25.1 MBytes   211 Mbits/sec  18190  
+[  6]  47.00-48.00  sec  21.0 MBytes   177 Mbits/sec  15240  
+[  6]  48.00-49.00  sec  22.7 MBytes   190 Mbits/sec  16420  
+[  6]  49.00-50.00  sec  22.3 MBytes   187 Mbits/sec  16140  
+[  6]  50.00-51.00  sec  21.9 MBytes   183 Mbits/sec  15840  
+[  6]  51.00-52.00  sec  21.1 MBytes   177 Mbits/sec  15280  
+[  6]  52.00-53.00  sec  22.0 MBytes   185 Mbits/sec  15940  
+[  6]  53.00-54.00  sec  21.3 MBytes   179 Mbits/sec  15420  
+[  6]  54.00-55.00  sec  26.8 MBytes   225 Mbits/sec  19410  
+[  6]  55.00-56.00  sec  26.6 MBytes   223 Mbits/sec  19250  
+[  6]  56.00-57.00  sec  24.3 MBytes   204 Mbits/sec  17600  
+[  6]  57.00-58.00  sec  25.1 MBytes   211 Mbits/sec  18210  
+[  6]  58.00-59.00  sec  27.6 MBytes   232 Mbits/sec  20020  
+iperf3: error - control socket has closed unexpectedly
