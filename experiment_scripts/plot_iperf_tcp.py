@@ -28,7 +28,7 @@ def bandwidth_fig(clients, bandwidths, bandwidths_with_splice, experiment, outfi
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel('# of Concurrent iPerf Clients')
     ax.set_ylabel('Bandwidth (Mbs/sec)')
-    ax.set_title('iPerf {} Bandwidth Performance'.format(experiment))
+    # ax.set_title('iPerf {} Bandwidth Performance'.format(experiment))
     ax.set_xticks(x)
     ax.set_xticklabels(clients)
     ax.legend()
@@ -82,9 +82,9 @@ def parse_workload_data(clients, t, outfile):
         bandwidth_l = 0.0
         bandwidth_l_s = 0.0
         for i in range(client):
-            fp = "./data/iperf-{}-{}/{}{}-{}-{}.json".format(client, t, client_ip_base, client_ip_suffix + i, client, t)
-            fp_splice = "./data/iperf-{}-{}-splice/{}{}-{}-splice-{}.json".format(client, t, client_ip_base,
-                                                                                  client_ip_suffix + i, client, t)
+            fp = "./data/data-tcp/iperf-{}-{}/{}{}-{}-{}.json".format(client, t, client_ip_base, client_ip_suffix + i, client, t)
+            fp_splice = "./data/data-tcp/iperf-{}-{}-splice/{}{}-{}-splice-{}.json".format(client, t, client_ip_base,
+                                                                                           client_ip_suffix + i, client, t)
             r = parse_iperf_stats(fp)
             r_s = parse_iperf_stats(fp_splice)
 

@@ -37,7 +37,7 @@ def bandwidth_fig(clients, bandwidths, bandwidths_with_splice, outfile):
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel('# of Concurrent iPerf Clients')
     ax.set_ylabel('Bandwidth (Mbs/sec)')
-    ax.set_title('iPerf UDP Bandwidth Performance')
+    # ax.set_title('iPerf UDP Bandwidth Performance')
     ax.set_xticks(x)
     ax.set_xticklabels(clients)
     ax.legend()
@@ -63,8 +63,8 @@ def parse_workload_data(clients, outfile):
         bandwidth_l = 0.0
         bandwidth_l_s = 0.0
         for i in range(client):
-            fp = "./data/iperf-{}-udp/{}{}-{}-udp.json".format(client, client_ip_base, client_ip_suffix + i, client)
-            fp_splice = "./data/iperf-{}-udp-splice/{}{}-{}-splice-udp.json".format(client, client_ip_base, client_ip_suffix + i, client)
+            fp = "./data/data-udp/iperf-{}-udp/{}{}-{}-udp.json".format(client, client_ip_base, client_ip_suffix + i, client)
+            fp_splice = "./data/data-udp/iperf-{}-udp-splice/{}{}-{}-splice-udp.json".format(client, client_ip_base, client_ip_suffix + i, client)
             r = parse_udp_server_data(fp)
             r_s = parse_udp_server_data(fp_splice)
 
@@ -79,4 +79,4 @@ def parse_workload_data(clients, outfile):
     bandwidth_fig(clients, bandwidths, bandwidths_with_splice, outfile)
 
 if __name__ == '__main__':
-    parse_workload_data([1, 2, 4, 6, 8], 'udp')
+    parse_workload_data([1, 2, 4, 6, 8], 'udp-bandwidth')

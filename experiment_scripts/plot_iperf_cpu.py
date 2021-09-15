@@ -26,7 +26,7 @@ def cpu_chart(labels, cpu, cpu_splice, experiment, outfile):
     ax.set_ylim(0, 1)
     ax.set_xlabel('# of Concurrent iPerf Clients')
     ax.set_ylabel('SSTP Server CPU Utilization (%)')
-    ax.set_title('iPerf {} CPU Utilization'.format(experiment.upper()))
+    # ax.set_title('iPerf {} CPU Utilization'.format(experiment.upper()))
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
 
@@ -60,7 +60,7 @@ def mem_chart(labels, mem, mem_splice, experiment, outfile):
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel('# of Concurrent iPerf Clients')
     ax.set_ylabel('SSTP Server Memory Usage (MB)')
-    ax.set_title('iPerf {} Memory Usage'.format(experiment.upper()))
+    # ax.set_title('iPerf {} Memory Usage'.format(experiment.upper()))
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
 
@@ -106,8 +106,8 @@ def parse_all_data(clients, experiment, outfile):
     cpu = []
     cpu_splice = []
     for client in clients:
-        fp = "./data/iperf-{}-{}/{}_cpumem.json".format(client, experiment, client)
-        fp_splice = "./data/iperf-{}-{}-splice/{}_cpumem.json".format(client, experiment, client)
+        fp = "./data/data-{}/iperf-{}-{}/{}_cpumem.json".format(experiment, client, experiment, client)
+        fp_splice = "./data/data-{}/iperf-{}-{}-splice/{}_cpumem.json".format(experiment, client, experiment, client)
         r = parse_cpumem_stats(fp)
         r_s = parse_cpumem_stats(fp_splice)
 
