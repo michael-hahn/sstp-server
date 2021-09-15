@@ -200,14 +200,16 @@ class SSTPProtocol(Protocol):
                         # print("[splice] splicing object: {} "
                         #       "(type: {}, taints: {})".format(obj, type(obj), obj.taints))
                         try:
+                            start_timer = time.perf_counter()
                             with obj.splice() as resource:
                                 # splice() will handle deletion automatically.
                                 # Developers can put more code here for defensive
                                 # programming afterwards if necessary.
-                                self.logging.info("[splice] Delete system object: {}".format(obj))
+                                self.logging.info("[splice] Taking {}s to delete system object: {}".format(time.perf_counter() - start_timer, obj))
                                 system_obj_synthesized += 1
                         except:
                             # Synthesize non-system-resource objects one at a time
+                            start_timer = time.perf_counter()
                             merged_constraints = concretize_and_merge_constraints(obj, unsplicify=False)
                             synthesized_obj = synthesize_obj(type(obj), merged_constraints)
                             # No synthesized object is produced, so the best we can do is to change object attributes.
@@ -220,7 +222,7 @@ class SSTPProtocol(Protocol):
                             else:
                                 replace.replace_single(obj, synthesized_obj)
                                 obj_synthesized += 1
-                            self.logging.info("[splice] Delete non-system object: {}".format(obj))
+                            self.logging.info("[splice] Taking {}s to delete non-system object: {}".format(time.perf_counter() - start_timer, obj))
                 # Respond to the client when Splice deletion is finished
                 self.transport.write(b'Splice: user %s is erased\r\n' % str(sid).encode())
                 return
