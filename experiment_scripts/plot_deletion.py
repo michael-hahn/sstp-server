@@ -66,7 +66,7 @@ def deletion_data_chart(xticks, xlabel, data, data_label, title, outfile,
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel(xlabel)
     ax.set_ylabel(data_label)
-    ax.set_title(title)
+    # ax.set_title(title)
     ax.set_xticks(x)
     ax.set_xticklabels(xticks)
     ax.legend()
