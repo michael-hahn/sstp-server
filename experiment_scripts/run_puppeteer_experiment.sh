@@ -44,15 +44,15 @@ taskset 0x10 top -b -n 60 -d 1 -p "${pid}" | awk -v OFS=',' '$1=="top" { time=$3
 
 # Run NUM_CLIENTS web clients
 COUNTER=1
-CPU1=5
-CPU2=6
+CPU1=4
+CPU2=5
 while [ ${COUNTER} -le "${NUM_CLIENTS}" ]
 do
   # Change the log file path (by replacement using sed) so that each puppeteer process will write to a separate log file
   path_line="const logpath = dir.concat(${COUNTER}, '.json');"
   sed -i "17s;.*;${path_line};" "${PUPPETEER_FILE}"
 
-  docker run -d --init --rm --cpus="2" -e cupload=100 --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
+  docker run -d --init --rm --cpuset-cpus="${CPU1},${CPU2}" --cap-add=SYS_ADMIN --name puppeteer-${COUNTER} \
   --net=container:sstp-client-${COUNTER} --mount type=bind,source="$(pwd)"/data,target=/home/pptruser/Downloads \
   puppeteer node -e "$(cat "${PUPPETEER_FILE}")"
   ((COUNTER++))
