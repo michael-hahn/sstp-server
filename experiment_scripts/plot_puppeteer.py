@@ -28,7 +28,7 @@ def latency_fig(clients, data, data_with_splice, outfile):
     ax.set_xlabel('# of Concurrent Puppeteer Clients')
     ax.set_ylabel('Average Page Load Time (msecs)')
     ax.set_ylim(bottom=0)
-    ax.set_title('Puppeteer Performance')
+    # ax.set_title('Puppeteer Performance')
     ax.set_xticks(x)
     ax.set_xticklabels(clients)
     ax.legend()
@@ -85,8 +85,8 @@ def parse_workload_data(clients, outfile):
         l = []
         l_s = []
         for i in range(1, client+1):
-            fp = "./data/puppeteer-{}-remote/{}.json".format(client, i)
-            fp_splice = "./data/puppeteer-{}-remote-splice/{}.json".format(client, i)
+            fp = "./data/data-puppeteer/puppeteer-{}-remote/{}.json".format(client, i)
+            fp_splice = "./data/data-puppeteer/puppeteer-{}-remote-splice/{}.json".format(client, i)
             r = parse_puppeteer_multi_stats(fp)
             r_s = parse_puppeteer_multi_stats(fp_splice)
             
